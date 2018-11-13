@@ -25,6 +25,10 @@ const _paths = {
   js: {
     src: `${_src}/js`,
     dest: `${_dest}/js`
+  },
+  assets: {
+    src: `${_src}/assets`,
+    dest: `${_dest}/assets`
   }
 }
 
@@ -86,7 +90,7 @@ function watchCss () {
 }
 
 /**
- * css
+ * js
  */
 function buildJs () {
   const config = WebpackConfig(_paths)
@@ -98,8 +102,19 @@ function watchJs () {
   gulp.watch(_paths.js.src, buildJs)
 }
 
-gulp.task('build', gulp.series(cleanDest, buildHtml, buildCss, buildJs))
-gulp.task('watch', gulp.parallel(watchHtml, watchCss, watchJs))
+/**
+ * assets
+ */
+function buildAssets () {
+  return gulp.src(`${_paths.assets.src}/**`)
+    .pipe(gulp.dest(_paths.assets.dest))
+}
+function watchAssets () {
+  gulp.watch(_paths.assets.src, buildAssets)
+}
+
+gulp.task('build', gulp.series(cleanDest, buildHtml, buildCss, buildJs, buildAssets))
+gulp.task('watch', gulp.parallel(watchHtml, watchCss, watchJs, watchAssets))
 gulp.task('develop', gulp.series(
   'build',
   startServer,
