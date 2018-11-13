@@ -1,14 +1,30 @@
 const gulp = require('gulp')
 const browserSync = require('browser-sync')
-const path = require('path')
 const del = require('del')
 const sass = require('gulp-sass')
+const WebpackConfig = require('./WebpackConfig')
+const webpack = require('webpack-stream')
+
+/**
+ * path resolution
+ */
+const path = require('path')
+const _dest = path.resolve(__dirname, 'dist')
+const _src = path.resolve(__dirname)
 
 const _paths = {
-  dest: path.resolve(__dirname, 'dest'),
-  src: {
-    html: path.resolve(__dirname, 'html'),
-    css: path.resolve(__dirname, 'styles')
+  dest: _dest,
+  html: {
+    src: `${_src}/html`,
+    dest: _dest
+  },
+  css: {
+    src: `${_src}/css`,
+    dest: `${_dest}/css`
+  },
+  js: {
+    src: `${_src}/js`,
+    dest: `${_dest}/js`
   }
 }
 
@@ -38,39 +54,52 @@ function startServer (done) {
   done()
 }
 function reloadServer (done) {
-  console.log('Sending refresh to browser')
+  // console.log('Sending refresh to browser')
   server && server.reload()
   done()
 }
 function watchServer () {
-  gulp.watch(`${_paths.dest}/**`, reloadServer)
+  gulp.watch(_paths.dest, reloadServer)
 }
 
 /**
  * build html
  */
 function buildHtml () {
-  return gulp.src(`${_paths.src.html}/**`)
-    .pipe(gulp.dest(_paths.dest))
+  return gulp.src(`${_paths.html.src}/**`)
+    .pipe(gulp.dest(_paths.html.dest))
 }
 function watchHtml () {
-  gulp.watch(`${_paths.src.html}/**`, buildHtml)
+  gulp.watch(_paths.html.src, buildHtml)
 }
 
 /**
  * css
  */
 function buildCss () {
-  return gulp.src(`${_paths.src.css}/main.scss`)
+  return gulp.src(`${_paths.css.src}/main.scss`)
     .pipe(sass({}))
-    .pipe(gulp.dest(`${_paths.dest}/css`))
+    .pipe(gulp.dest(_paths.css.dest))
 }
 function watchCss () {
-  gulp.watch(_paths.src.css, buildCss)
+  gulp.watch(_paths.css.src, buildCss)
 }
 
-gulp.task('build', gulp.series(cleanDest, buildHtml, buildCss))
-gulp.task('watch', gulp.parallel(watchHtml, watchCss))
+/**
+ * css
+ */
+function buildJs () {
+  const config = WebpackConfig(_paths)
+  return gulp.src(_paths.js.src)
+    .pipe(webpack(config))
+    .pipe(gulp.dest(_paths.js.dest))
+}
+function watchJs () {
+  gulp.watch(_paths.js.src, buildJs)
+}
+
+gulp.task('build', gulp.series(cleanDest, buildHtml, buildCss, buildJs))
+gulp.task('watch', gulp.parallel(watchHtml, watchCss, watchJs))
 gulp.task('develop', gulp.series(
   'build',
   startServer,
