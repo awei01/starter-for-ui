@@ -1,6 +1,7 @@
+const merge = require('webpack-merge')
 
-module.exports = function (paths) {
-  return {
+module.exports = function (paths, options) {
+  const defaults = {
     context: paths.js.src,
     entry: {
       main: './main.js'
@@ -28,4 +29,5 @@ module.exports = function (paths) {
       ]
     }
   }
+  return merge(defaults, options || {})
 }

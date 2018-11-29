@@ -19,11 +19,11 @@ const _paths = {
     dest: _dest
   },
   css: {
-    src: `${_src}/css`,
+    src: `${_src}/styles`,
     dest: `${_dest}/css`
   },
   js: {
-    src: `${_src}/js`,
+    src: `${_src}/javascripts`,
     dest: `${_dest}/js`
   },
   assets: {
@@ -81,7 +81,8 @@ function watchHtml () {
  * css
  */
 function buildCss () {
-  return gulp.src(`${_paths.css.src}/main.scss`)
+  // include all .scss files except those that start with _
+  return gulp.src(`${_paths.css.src}/[^_]*.scss`)
     .pipe(sass({}))
     .pipe(gulp.dest(_paths.css.dest))
 }
